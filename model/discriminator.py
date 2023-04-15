@@ -14,9 +14,48 @@ The code was initially borrowed from the following two sources:
 
 """
 
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+
+# tf.disable_v2_behavior()
+
 from builtins import range
-from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
+#from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
+#from tensorflow.python.ops import rnn_cell_impl
+
+"""
+ This code for linear function taken from following:
+ https://github.com/mkroutikov/tf-lstm-char-cnn/blob/7e899e6992cbf9a96e6d791e5d364eaaeec339a2/model.py
+"""
+
+def linear(input_, output_size, scope=None):
+    '''
+    Linear map: output[k] = sum_i(Matrix[k, i] * args[i] ) + Bias[k]
+
+    Args:
+        args: a tensor or a list of 2D, batch x n, Tensors.
+    output_size: int, second dimension of W[i].
+    scope: VariableScope for the created subgraph; defaults to "Linear".
+  Returns:
+    A 2D Tensor with shape [batch x output_size] equal to
+    sum_i(args[i] * W[i]), where W[i]s are newly created matrices.
+  Raises:
+    ValueError: if some of the arguments has unspecified or wrong shape.
+  '''
+
+    shape = input_.get_shape().as_list()
+    if len(shape) != 2:
+        raise ValueError("Linear is expecting 2D arguments: %s" % str(shape))
+    if not shape[1]:
+        raise ValueError("Linear expects shape[1] of arguments: %s" % str(shape))
+    input_size = shape[1]
+
+    # Now the computation.
+    with tf.variable_scope(scope or "SimpleLinear"):
+        matrix = tf.get_variable("Matrix", [output_size, input_size], dtype=input_.dtype)
+        bias_term = tf.get_variable("Bias", [output_size], dtype=input_.dtype)
+
+    return tf.matmul(input_, tf.transpose(matrix)) + bias_term
 
 def highway(input_, size, layer_size=1, bias=-2, f=tf.nn.relu):
     """Highway Network (cf. http://arxiv.org/abs/1505.00387).
@@ -28,11 +67,10 @@ def highway(input_, size, layer_size=1, bias=-2, f=tf.nn.relu):
     output = input_
     for idx in range(layer_size):
         with tf.variable_scope('output_lin_%d' % idx):
-            output = f(core_rnn_cell_impl._linear(output, size, 0))
+            output = f(linear(output, size, 0))
 
         with tf.variable_scope('transform_lin_%d' % idx):
-            transform_gate = tf.sigmoid(
-                core_rnn_cell_impl._linear(input_, size, 0) + bias)
+            transform_gate = tf.sigmoid(linear(input_, size, 0) + bias)
             carry_gate = 1. - transform_gate
 
         output = transform_gate * output + carry_gate * input_

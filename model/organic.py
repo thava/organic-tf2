@@ -26,12 +26,12 @@ from gpu_utils import pick_gpu_lowest_memory
 try:
     gpu_free_number = str(pick_gpu_lowest_memory())
     os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_free_number)
-    import tensorflow as tf
+    import tensorflow.compat.v1 as tf
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     from keras import backend as K
 except Exception:
-    import tensorflow as tf
+    import tensorflow.compat.v1 as tf
     from keras import backend as K
 from nn_metrics import KerasNN
 #from gp_metrics import GaussianProcess
@@ -39,14 +39,14 @@ from builtins import range
 from collections import OrderedDict
 from generator import Generator, Rollout
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import random
 import dill as pickle
 import mol_methods as mm
 from data_loaders import Gen_Dataloader, Dis_Dataloader
 from discriminator import Discriminator
 from custom_metrics import get_metrics, metrics_loading
-from tensorflow import logging
+from tensorflow.compat.v1 import logging
 from rdkit import rdBase
 import pandas as pd
 from tqdm import tqdm

@@ -14,7 +14,7 @@ import rdkit.Chem.AllChem as Chem
 import tensorflow as tf
 from keras.layers import Dense, Dropout
 from keras.models import Sequential, load_model
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 from keras.callbacks import EarlyStopping
 from keras_tqdm import TQDMCallback
 

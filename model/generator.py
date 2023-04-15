@@ -13,7 +13,7 @@ Carlos Outeiral has handled some issues with the Rollout efficiency,
 removed duplicates, corrected bugs and added some documentation.
 """
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 from tensorflow.python.ops import tensor_array_ops, control_flow_ops
 
